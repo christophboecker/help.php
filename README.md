@@ -53,18 +53,13 @@ abgelegt werden.
 
 **Einfach (README) oder komplexe Dokumentation**
 
-    package:  focuspoint
-    version:  '2.0.0'
-    author: Friends Of REDAXO
-    supportpage: https://github.com/FriendsOfREDAXO/focuspoint
-
     help: 
       mode: readme | docs     # Betriebart: Fallback auf readme falls kein «addon»/docs
       language: de_de         # Fallback-Language bevor das System-Fallback geift
       navigation: _intro.md   # Navigation (linke Spalte)
       content: _intro.md      # initiale Content-Datei (rechte Spalte)
 
-Mit `help: docs` wid der Modus "komplexe Dokumentation" angefordert. Ansonsten wird die README-Variante genommen.
+Mit `help: docs` wird der Modus "komplexe Dokumentation" angefordert. Ansonsten wird die README-Variante genommen.
 
 **Einbinden die eigene Addon-Seite**
 
