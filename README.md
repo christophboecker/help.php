@@ -121,5 +121,13 @@ Vorhandene interne Links und Anker werden umfänglich unterstützt.
 
 ## Tests:
 
-getestet mit den Dokumentenverzeichnissen 
-    
+getestet mit den Dokumentenverzeichnissen von [YForm](https://github.com/yakamara/redaxo_yform_docs/tree/0acc12f225649ff072146a752fe06d5618a780bf) und [SKED](https://github.com/FriendsOfREDAXO/sked/tree/master/plugins/documentation/docs/de_de).
+
+Die Dokumentenverzeichnisse (docs) wurden in das Addon-Root kopiert. In der `package.yml`wurde der Aufruf im docs-Modus konfiguriert:
+
+    help:
+        mode: docs
+        navigation: main_navi.md
+        content: main_intro.md
+
+ 
