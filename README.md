@@ -61,7 +61,7 @@ abgelegt werden.
 
 Mit `help: docs` wird der Modus "komplexe Dokumentation" angefordert. Ansonsten wird die README-Variante genommen.
 
-**Einbinden die eigene Addon-Seite**
+**Einbinden in die eigene Addon-Seite**
 
     page:
         ....
