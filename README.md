@@ -72,7 +72,7 @@ Mit `help: docs` wird der Modus "komplexe Dokumentation" angefordert. Ansonsten 
                 subPath: help.php
 
 
-**Einbinden die andere Addon-Seiten**
+**Einbinden in andere Addon-Seiten**
 
 Hier gezeigt am Beispiel des Media-Managers
 
