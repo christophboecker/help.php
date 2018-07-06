@@ -41,9 +41,8 @@ $defaults = array_merge (
 
 // language and fallback
 $language = rex::getProperty('lang');
-$language = 'pt_br';
 $fallback = array_merge( [$defaults[YML_LANG]], rex::getProperty('lang_fallback', []) );
-$fallback = array_values(array_unique(array_diff( $fallback, [$language] )));
+$fallback = array_values(array_unique(array_diff( $fallback, [$language,''] )));
 
 // directory names
 $docPath = $this->getPath( PATH_DOC );
@@ -69,7 +68,7 @@ if ( ($image = rex_request( URL_IMAGE, 'string')) != '' )
 }
 
 // set File_not_found-Message
-$file_not_found = 'Datei nicht gefunden'; #rex_i18n::msg( )
+$file_not_found = $this->i18n('docs_not_found');
 
 // detect operation modus: pure readme vs. multifile-documentation
 // no docPath? switch to readme-Mode
@@ -103,7 +102,7 @@ if( $docMode )
         $i = 1;
         $pageDefaults = (array)$this->getProperty('page');
         while ( ($x=rex_be_controller::getCurrentPagePart(++$i)) !== null) {
-            $defaults = (array)$pageDefaults['subpages'][$x];
+            $pageDefaults = (array)$pageDefaults['subpages'][$x];
         }
     // or somewhere else in the "pages"
     } elseif( isset( $this->getProperty('pages')[$page] )) {
@@ -111,10 +110,11 @@ if( $docMode )
     } else {
         $pageDefaults = [];
     }
+
     if( !isset($pageDefaults[YML_SECTION]) ) $pageDefaults[YML_SECTION] = [];
-    $defaults = array_merge( $defaults,$pageDefaults[YML_SECTION] );
-    $navigationFile = $defaults[YML_NAVI];
-    $contentFile = rex_request( URL_FILE, 'string', $defaults[YML_CONT] );
+    $pageDefaults = array_merge( $defaults,$pageDefaults[YML_SECTION] );
+    $navigationFile = $pageDefaults[YML_NAVI];
+    $contentFile = rex_request( URL_FILE, 'string', $pageDefaults[YML_CONT] );
 
     // read content- and navigation-file
     $content = rex_file::get( "$langPath$contentFile" );                // addon/docs/de_de/xy.md
