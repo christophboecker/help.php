@@ -96,6 +96,8 @@ Hier gezeigt am Beispiel des Media-Managers
 
 Die Help-Seite wird als Unterseite beim Media-Manager eingehängt. Es wird keine Navigation angezeigt, nur die Seite mm.md (falls im doc-Modus)
 
+> `navigation` ist hier leer. Daher wird keine Navigationsspalte angezeigt, nur der Inhalt, dafür aber in voller Breite
+
 ### Language-Fallback
 
 1. nutze die aktulle Spracheinstellung
@@ -111,6 +113,16 @@ Docs-Rot stehen. Die Datei wird zunächst im Sprachverzeihnis gesucht, dann im D
     «addon»/docs/bild.jpg
     «addon»/docs/en_gb/bild.jpg
     fehlermeldung
+
+### xx_xx.lang
+
+An drei Stellen sind verweise auf die jeweilige lang-Datei des Addons (`$this->18n(...);`);
+
+| lang-Eintrag | Verwendung |
+| ------------ | ---------- |
+| docs_navigation | Titel der Navigatonsspalte (z.B. "Navigation")  |
+| docs_content | Titel der Inhaltsspalte (z.B. "Inhalt") |
+| docs_not_found | Fehlermeldung wenn eine Datei auch mit Fallback nicht gefunden wurde |
 
 ## Regeln für die README
 
