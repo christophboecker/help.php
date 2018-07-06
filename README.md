@@ -119,4 +119,7 @@ Die Readme wird eingelesen und zerlegt. Aus den Überschriften Level 2 und 3 wir
 Alles vor dem ersten L2 sollte daher nur die L1- Überschrift sein; der Teil wird ignoriert.  Cest la vie.
 Vorhandene interne Links und Anker werden umfänglich unterstützt.
 
+## Tests:
+
+getestet mit den Dokumentenverzeichnissen 
     
