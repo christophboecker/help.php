@@ -312,7 +312,7 @@ if( $navigation )        {
 echo '</div></section>';
 //echo '<link rel="stylesheet" type="text/css" media="all" href="../assets/addons/yform/plugins/docs/docs.css?buster=1530520815">';
 echo '<style> .rex-yform-docs img {max-width:100%;}</style>';
-/* ?>
+?>
 <style>
 .rex-yform-docs h1 {
     font-size: 22px;
