@@ -255,6 +255,8 @@ else {
         $match = array_filter( $match, function($v){return $v['level']> 0;});
         $match[key($match)]['level'] = 1;
 
+        //----------
+        // set "group-end" for top-level
         $groupEnd = -1;
         foreach( array_reverse($match,true) as $k=>$v ) {
             if( $groupEnd == -1 ) $groupEnd = $v['end'];
@@ -326,7 +328,13 @@ else {
         //----------
         // setup the navigation
         foreach( $match as $k=>$v ) {
-            $navigation .= str_repeat( " ", $v['level'] ) . "- [{$v['titel']}]($docUrl{$v['anchor']})" . PHP_EOL;
+            $navigation .= str_repeat(' ', $v['level'] ) . '- ';
+            if( $v['size'] == 0 ) {
+                $navigation .= $v['titel'];
+            } else {
+                $navigation .= "[{$v['titel']}]($docUrl{$v['anchor']})";
+            }
+            $navigation .= PHP_EOL;
         }
 
     }
