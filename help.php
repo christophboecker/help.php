@@ -329,7 +329,7 @@ else {
         // setup the navigation
         foreach( $match as $k=>$v ) {
             $navigation .= str_repeat(' ', $v['level'] ) . '- ';
-            if( $v['size'] == 0 ) {
+            if( $defaults[YML_CHAP] != CHAP_LEVEL1 && $v['size'] == 0 ) {
                 $navigation .= $v['titel'];
             } else {
                 $navigation .= "[{$v['titel']}]($docUrl{$v['anchor']})";
