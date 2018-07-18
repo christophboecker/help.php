@@ -92,6 +92,7 @@ Die seitenspezifische Konfiguration hat Vorrang vor der Addon-Konfiguration. Sin
 |[mode](#conf-parameter-mode)||readme|Auswahl der Betriebsart('docs' oder 'readme')|
 |[fallback](#conf-parameter-fallback)||«leer»|Fallback-Language|
 |[title](#conf-parameter-title)||«leer»|Seitentitel|
+|[repository](#conf-parameter-repo)||«leer»|Link zum Text in einem Repository wie GitHb|
 |[markdown_break_enabled](#conf-parameter-mbe)||0|Umgang mit Zeilenumbrüchen in Markdown|
 |[level](#conf-parameter-level)|readme|1|Steuert den Anzeigeumfang durch Kapitelauswahl (1= # und ##)|
 |[scope](#conf-parameter-scope)|readme|section| sollen alle Kapitel einzeln behandelt oder auf der oberen Ebene zusammengefasst werden ('chapter')|
@@ -129,6 +130,15 @@ help:
     fallback: pt_br
 ```
 
+Angenommen, die aktuelle Sprache wäre "de_de" und der im System eingestellte Fallback "en_gb,de_de", ergibt
+sich Reihenfolge der Sprachen zu:
+
+- de_de
+- pt_br
+- en_gb
+
+Im Readme-Modus wird danach auf die README.MD im AddOn-Root zurückgegriffen. Im Docs-Modus wird danach
+die Fehlereldung ([file_not_found](#lang)) angezeigt
 
 <a name="conf-parameter-title"></a>
 ### title
@@ -165,7 +175,7 @@ pages:
         subPath: help.php
         title: 'Anleitung'
         help:
-            mode: docs,
+            mode: docs
             title: 'translate:«addon»'
 ```
 
@@ -175,6 +185,32 @@ Datei `pages/index.php`. Dort werden die Sub-Pages noch in der alten Notation ei
 
 
 Es sollte aber wirklich nur ein Notnagel sein.
+
+<a name="conf-parameter-repo"></a>
+### repository
+
+Über dne Parameter wird eine URL festgelegt, unter der das AddOn in einem Repository (z.B. GitHub) zu finden ist.
+
+Die Stelle, an der der Dateiname eingetragen wird, ist mit %% markiert.
+
+Beispiel:
+```
+page:
+    subpages:
+        seite:
+            subPath: help.php
+            title: 'Anleitung'
+            help:
+                mode: docs
+                repository: https://github.com/FriendsOfREDAXO/focuspoint/%%
+```
+Der Dateiname, der statt %% in den Link eingebaut wird, enthält immer die zugehörige Verzeichnisstruktur 
+im Root des AddOn.
+
+- docs/de_de/abc.md
+- docs/README.de_de.md
+- README.md
+
 
 
 <a name="conf-parameter-mbe"></a>
@@ -292,13 +328,14 @@ Mit dieser `package.yml` werden drei verschiedene Seiten über `help.php` erzeug
 <a name="lang"></a>
 # Konfiguration - Sprachdatei
 
-An drei Stellen sind Verweise auf die jeweilige lang-Datei des Addons (`$this->18n(...);`);
+An vier Stellen sind Verweise auf die jeweilige lang-Datei des Addons (`$this->18n(...);`);
 
 | lang-Eintrag | Verwendung |
 | ------------ | ---------- |
 | docs_navigation | Titel der Navigatonsspalte (z.B. "Navigation")  |
 | docs_content | Titel der Inhaltsspalte (z.B. "Inhalt") |
-| docs_not_found | Fehlermeldung wenn eine Datei auch mit Fallback nicht gefunden wurde |
+| docs_not_found | Fehlermeldung wenn eine Datei auch durch Fallback nicht gefunden wurde |
+| docs_repository_button | Text für den Bearbeiten-Button im [Repository-Link](#conf-parameter-repo)   |
 
 <a name="write-readme"></a>
 # Autorenanleitung für README.md
