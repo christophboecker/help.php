@@ -106,7 +106,7 @@ if( $defaults[YML_MODE] == MODE_DOC || $image ) {
 //  assure language-fallback
 if ( $image )
 {
-    ob_end_clean();
+    rex_response::cleanOutputBuffers();
     foreach( $language as $dir ) {
         $imageFile = "$dir$image";
         if( is_file( $imageFile ) ) {
