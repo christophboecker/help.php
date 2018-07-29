@@ -17,7 +17,6 @@ const YML_LEVL = 'level';
 const YML_CHAP = 'scope';
 const YML_MDBE = 'markdown_break_enabled';
 const YML_HEAD = 'title';
-const YML_REPO = 'repository';
 
 // parameter-values and defaults
 const MODE_DOC = 'docs';
@@ -45,23 +44,22 @@ const MARKER = 'rexdocreadme-';
 //  3) default-values
 //
 
-$page = rex_be_controller::getCurrentPagePart();
-if( $page[0] == $this->getName() ) {
-    // page = addon/.../...
+$page = rex_request('page','string');
+// page = addon/.../...
+if( $this->getName() == rex_be_controller::getCurrentPagePart(1) ) {
+    $i = 1;
     $pageDefaults = (array)$this->getProperty('page');
-    while( $p = next($page) ){
-        $pageDefaults = (array)$pageDefaults['subpages'][$p];
+    while ( ($page=rex_be_controller::getCurrentPagePart(++$i)) !== null) {
+        $pageDefaults = (array)$pageDefaults['subpages'][$page];
     }
+// or somewhere else in the "pages"
+//     works properly only with AddOn using the modern notation for sub-page-inclusion in pages/index.php:
+//          rex_be_controller::includeCurrentPageSubPath();
+//
+} elseif( isset( $this->getProperty('pages')[$page] )) {
+    $pageDefaults = (array)$this->getProperty('pages')[$page];
 } else {
-    // or somewhere else in the "pages"
-    //     works properly only with AddOn using the modern notation for sub-page-inclusion in pages/index.php:
-    //          rex_be_controller::includeCurrentPageSubPath();
-    $page = implode('/',$page);
-    if( isset( $this->getProperty('pages')[$page] )) {
-        $pageDefaults = (array)$this->getProperty('pages')[$page];
-    } else {
-        $pageDefaults = [];
-    }
+    $pageDefaults = [];
 }
 if( !isset($pageDefaults[YML_SECTION]) ) $pageDefaults[YML_SECTION] = [];
 $defaults = array_merge (
@@ -134,8 +132,6 @@ $files = [];
 $navigation = '';
 $content = '';
 $selected = '';
-$repoNavigation = '';
-$repoContent = '';
 
 //----------
 // complex multi-file manual
@@ -153,16 +149,10 @@ if( $defaults[YML_MODE] == MODE_DOC ) {
 	// read content-file and navigation file with language-fallback
 	//
     foreach( $language as $dir ) {
-		if( $content = rex_file::get("$dir$contentFile",'') ) {
-            $contentFile = substr("$dir$contentFile",strlen($addonRoot) );
-            break;
-        }
+		if( $content = rex_file::get("$dir$contentFile",'') ) break;
 	}
 	foreach( $language as $dir ) {
-		if( $navigation = rex_file::get("$dir$navigationFile",'') ) {
-            $navigationFile = substr("$dir$navigationFile",strlen($addonRoot) );
-            break;
-        }
+		if( $navigation = rex_file::get("$dir$navigationFile",'') ) break;
 	}
 
 	//---------
@@ -180,14 +170,6 @@ if( $defaults[YML_MODE] == MODE_DOC ) {
     if( $content == '' ) {
         $content = $this->i18n('docs_not_found');
     }
-
-    //----------
-    // prepare Github-links
-    if( $defaults[YML_REPO] ) {
-        $repoNavigation = str_replace( '%%', $navigationFile, $defaults[YML_REPO] );
-        $repoContent = str_replace( '%%', $contentFile, $defaults[YML_REPO] );
-    }
-
 
 }
 
@@ -356,12 +338,6 @@ else {
             $navigation .= PHP_EOL;
         }
 
-        //----------
-        // prepare Github-links
-        if( $defaults[YML_REPO] ) {
-            $repoContent = str_replace( '%%', $contentFile, $defaults[YML_REPO] );
-        }
-
     }
 }
 
@@ -397,22 +373,7 @@ $content = $parser->text($content);
 $navigation = $parser->text($navigation);
 unset( $parser );
 
-
-//----------
-// format Github-links
-$button = ['label'=>' '.$this->i18n('docs_repository_button'),'icon'=>'editmode','attributes'=>['class'=>['btn-xs','btn-default','pull-right']]];
-if( $repoContent ) {
-    $button['url'] = $repoContent;
-    $fragment = new rex_fragment();
-    $fragment->setVar('buttons',[$button],false);
-    $repoContent = $fragment->parse('core/buttons/button.php');
-}
-if( $repoNavigation ) {
-    $button['url'] = $repoNavigation;
-    $fragment = new rex_fragment();
-    $fragment->setVar('buttons',[$button],false);
-    $repoNavigation = $fragment->parse('core/buttons/button.php');
-}
+dump(get_defined_vars());
 
 //----------
 // generate output
@@ -422,14 +383,14 @@ if( $defaults[YML_HEAD] ) {
 }
 
 $fragment = new rex_fragment();
-$fragment->setVar('title', $this->i18n('docs_content').$repoContent, false );
+$fragment->setVar('title', $this->i18n('docs_content'), false );
 $fragment->setVar('body', $content, false);
 $content = $fragment->parse('core/page/section.php');
 
 if( $navigation ) {
 
 	$fragment = new rex_fragment();
-	$fragment->setVar('title', $this->i18n('docs_navigation').$repoNavigation, false );
+	$fragment->setVar('title', $this->i18n('docs_navigation'), false );
 	$fragment->setVar('body', $navigation, false);
 	$navigation = $fragment->parse('core/page/section.php');
 
