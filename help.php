@@ -358,7 +358,8 @@ $navigation = preg_replace_callback( $search, $replace, $navigation );
 $search = '/(!)?\[(.*?)\]\((.*?)\)/';
 $replace = function ($item) use ($files,$imgUrl,$docUrl) {
         if( !$item[3] ) return $item[0];
-		$url = (isset($files[$item[3]]) ? ($item[1]=='!'?$imgUrl:$docUrl) : '') . $item[3];
+        $link = explode('#',$item[3]);
+		$url = (isset($files[$link[0]]) ? ($item[1]=='!'?$imgUrl:$docUrl) : '') . $item[3];
         $link = "{$item[1]}[{$item[2]}]($url)";
 		return $link;
 	};
@@ -373,9 +374,7 @@ $content = $parser->text($content);
 $navigation = $parser->text($navigation);
 unset( $parser );
 
-dump(get_defined_vars());
-
-//----------
+/----------
 // generate output
 
 if( $defaults[YML_HEAD] ) {
