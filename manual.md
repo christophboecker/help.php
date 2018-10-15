@@ -37,21 +37,18 @@ Die Datei README.md wird im Root eines Addons erwartet. Sofern es sprachspezifis
 im Verzeichnis `/docs` stehen.
 
     «addon»/
-        docs/
-            REDAME.de_de.md
-            README.en_gb.md
-            bilddateien etc.
+        REDAME.de.md
+        README.en.md
         README.md
 
- Das Verfahren erfordert eine gewisse Disziplin und Grundstruktur beim [Schreiben der README.md](#write-readme), damit die
- Inhalte optimal dargestellt werden.
-
+Das Verfahren erfordert eine gewisse Disziplin und Grundstruktur beim [Schreiben der README.md](#write-readme), damit die
+Inhalte optimal dargestellt werden.
 
 <a name="mode-doc"></a>
 ## Doc-Modus - Multi-Datei-Dokumentation
 
 Im Doc-Modus werden komplexe Dokumentationen aufbereitet, die aus mehreren Dateien bestehen. I.d.R.
-werden einzelne Kapitel als eine Datei geführt. Ein zentrales Menü erlaudt den raschen Kapitelwechsel.
+werden einzelne Kapitel als eine Datei geführt. Ein zentrales Menü erlaubt den raschen Kapitelwechsel.
 
 - **Navigation:** Die Navigation wird als Markdown-Datei bereitgestellt. Sofern nicht anders konfiguriert ist es
 die Datei `main_navi.md`. Die Navigation wird in der linken Spalte angezeigt.
@@ -61,14 +58,18 @@ Die Dateien werden im Verzeichnis `docs` in sprachspezifischen Unterverzeichniss
 
     «addon»/
         docs/
-            de_de/
+            de/
                 main_navi.md
                 main_intro.md
                 kapitel1.md
                 ...
                 bilddateien (sprachspezifisch)
-            en_gb/
+            en/
+                main_navi.md
+                main_intro.md
+                kapitel1.md
                 ...
+                bilddateien (sprachspezifisch)
         bilddateien (sprachneutral)
 
 
@@ -120,25 +121,26 @@ help:
 ### fallback
 
 Per Default wird immer versucht, die Texte in der für den User gültigen i18n-Sprache anzuzeigen. Der
-akzulle wird wird mit `rex_i18n::getLocale()` abgerufen. Sollten keine Texte für diese Sprache gefunden
-werden sucht das System zunächst Rextten, die in der mit `fallback: «sprache»` angegebenen Sprache
-verfasst sind. Existiert auch der nicht, wird das in der REDAXO-Instanz konfigurierte Fallback herangezogen
+aktuelle Sprache wird wird mit `rex_i18n::getLocale()` abgerufen. Sollten keine Texte für diese Sprache gefunden
+werden, greift der Fallback-Mechanismus. Zuerst wird die im Addon definierte Fallback-Sprache gesucht, also die Texte, 
+die in der mit `fallback: «sprache»` angegebenen Sprache
+verfasst sind. Existiert auch die Sprache nicht, wird das in der REDAXO-Instanz konfigurierte Fallback herangezogen
 (`rex::getProperty('lang_fallback', [])`).
 
 ```
 help:
-    fallback: pt_br
+    fallback: pt
 ```
 
 Angenommen, die aktuelle Sprache wäre "de_de" und der im System eingestellte Fallback "en_gb,de_de", ergibt
 sich Reihenfolge der Sprachen zu:
 
-- de_de
-- pt_br
-- en_gb
+- de
+- pt
+- en
 
-Im Readme-Modus wird danach auf die README.MD im AddOn-Root zurückgegriffen. Im Docs-Modus wird danach
-die Fehlereldung ([file_not_found](#lang)) angezeigt
+Im Readme-Modus wird danach in letzter Instanz auf die README.md im AddOn-Root zurückgegriffen. Im Docs-Modus wird danach
+die Fehlermeldung ([file_not_found](#lang)) angezeigt
 
 <a name="conf-parameter-title"></a>
 ### title
@@ -146,12 +148,6 @@ die Fehlereldung ([file_not_found](#lang)) angezeigt
 In den meisten Fällen werden die Unterseiten eines Addon über ein Script `«addon»/pages/index.php`
 aufgerufen, dass sowohl einen Seitentitel als auch die
 jeweilige Seite aufbaut. Zum Seitentitel gehört auch das AddOn-Menü.
-
-```
-echo rex_view::title(rex_i18n::msg('title'));
-include rex_be_controller::getCurrentPageObject()->getSubPath();
-```
-bzw. in der neuen Notation
 
 ```
 echo rex_view::title(rex_i18n::msg('title'));
@@ -179,17 +175,13 @@ pages:
             title: 'translate:«addon»'
 ```
 
-> Der zweite Fall (pages) funktioniert so zur Zeit nur bei einigen AddOn, nicht z.B. bei SKED oder YForm. Der Grund ist die Notation in der
-Datei `pages/index.php`. Dort werden die Sub-Pages noch in der alten Notation eingebunden. Mit der
-"neuen" Schreibweise, auf die noch nicht alle AddOn umgestellt sind, klapt es wie erwartet
-
-
-Es sollte aber wirklich nur ein Notnagel sein.
+> Der zweite Fall (pages, Einhängen in ein anderes Addon) funktioniert nur bei AddOns, deren index.php `pages/index.php` Seiten mit 
+`rex_be_controller::includeCurrentPageSubPath();` einbindet.
 
 <a name="conf-parameter-repo"></a>
 ### repository
 
-Über dne Parameter wird eine URL festgelegt, unter der das AddOn in einem Repository (z.B. GitHub) zu finden ist.
+Über den Parameter wird eine URL festgelegt, unter der das AddOn in einem Repository (z.B. GitHub) zu finden ist.
 
 Die Stelle, an der der Dateiname eingetragen wird, ist mit %% markiert.
 
@@ -207,11 +199,9 @@ page:
 Der Dateiname, der statt %% in den Link eingebaut wird, enthält immer die zugehörige Verzeichnisstruktur 
 im Root des AddOn.
 
-- docs/de_de/abc.md
-- docs/README.de_de.md
+- docs/de/abc.md
+- README.de.md
 - README.md
-
-
 
 <a name="conf-parameter-mbe"></a>
 ### markdown_break_enabled
