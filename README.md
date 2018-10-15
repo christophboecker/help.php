@@ -17,18 +17,16 @@ Zeigt Multifile-Dokumentationen/Hilfen/Handbücher aus dem Verzeichnis
 ```
   «addon»/
     docs/
-      sprachübergreifende Dateien (z.B. Bilder)
+      sprachübergreifende Dateien (.md und Bilder)
       «lang»/
-        sprachbezogene Dateien
+        sprachbezogene Dateien (.md und bilder)
 ```
 
 Zeigt die zentrale oder sprachbezogene README.md aufbereitet an.
 
 ```
   «addon»/
-    docs/
-      sprachübergreifende Dateien (z.B. Bilder)
-      README.«lang».md
+    README.«lang».md
     README.md
 ```
 
@@ -42,22 +40,21 @@ Splittet README-Dateien in Kapitel auf (virtuelle .md), generiert die Navigation
 ## Vorteile:
 
 - alle bisher bestehenden Dokumentationslösungen für Addons, die auf dem Docs-PlugIn beruhen,
-können sofort umgestellt werden (vermutlich ohne oder nur mit sehr geringem Anpassungsaufwand)
+können oft ohne bzw. mit sehr geringem Anpassungsaufwand umgestellt werden
 - README.md, falls keine erweiterte Dokumentation vorgesehen
-- Kompatibel zu GitHub (Readme).
 
 ## bisherige Unverträglichkeiten
 
 ### Markdown
 
 Alle Manipulationen finden im Markdown statt. Es wird jeweils Markdown-Code generiert, kein Mischcode aus HTML und Markdown. 
-Einige AddOn (Demo, SKED) haben in der Intro folgenden Code, der tadellos mit den bestehenden DOC-Plugins harmoniert. 
+Einige AddOn haben in der Intro der Doku folgenden Code, der tadellos mit den bestehenden DOC-Plugins harmoniert. 
 ```
 <p style="text-align:center">
 ![FriendsOfREDAXO](for.png)
 </p>
 ```
-Der Grund ist einfach: der Bilderlink wird schon vor der Markdown-Umwandlung in einen HTML-Link umgesetzt. Da `help.php` auf Markdown-Ebene arbeitet, wird 'parseDownExtra' den im p-Tag eingseschlossenen Code nicht umwandeln.
+Der Grund ist einfach: der Bilderlink wird schon vor der Markdown-Umwandlung in einen HTML-Link umgesetzt. Da `help.php` auf Markdown-Ebene arbeitet, wird 'parseDownExtra' den im p-Tag eingeschlossenen Code nicht umwandeln.
 
 Empfehlung: 
 ```
