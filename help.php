@@ -17,6 +17,7 @@ const YML_LEVL = 'level';
 const YML_CHAP = 'scope';
 const YML_MDBE = 'markdown_break_enabled';
 const YML_HEAD = 'title';
+const YML_REPO = 'repository';
 
 // parameter-values and defaults
 const MODE_DOC = 'docs';
@@ -44,26 +45,27 @@ const MARKER = 'rexdocreadme-';
 //  3) default-values
 //
 
-$page = rex_request('page','string');
-// page = addon/.../...
-if( $this->getName() == rex_be_controller::getCurrentPagePart(1) ) {
-    $i = 1;
+$page = rex_be_controller::getCurrentPagePart();
+if( $page[0] == $this->getName() ) {
+    // page = addon/.../...
     $pageDefaults = (array)$this->getProperty('page');
-    while ( ($page=rex_be_controller::getCurrentPagePart(++$i)) !== null) {
-        $pageDefaults = (array)$pageDefaults['subpages'][$page];
+    while( $p = next($page) ){
+        $pageDefaults = (array)$pageDefaults['subpages'][$p];
     }
-// or somewhere else in the "pages"
-//     works properly only with AddOn using the modern notation for sub-page-inclusion in pages/index.php:
-//          rex_be_controller::includeCurrentPageSubPath();
-//
-} elseif( isset( $this->getProperty('pages')[$page] )) {
-    $pageDefaults = (array)$this->getProperty('pages')[$page];
 } else {
-    $pageDefaults = [];
+    // or somewhere else in the "pages"
+    //     works properly only with AddOn using the modern notation for sub-page-inclusion in pages/index.php:
+    //          rex_be_controller::includeCurrentPageSubPath();
+    $page = implode('/',$page);
+    if( isset( $this->getProperty('pages')[$page] )) {
+        $pageDefaults = (array)$this->getProperty('pages')[$page];
+    } else {
+        $pageDefaults = [];
+    }
 }
 if( !isset($pageDefaults[YML_SECTION]) ) $pageDefaults[YML_SECTION] = [];
 $defaults = array_merge (
-    [YML_MODE=>DEF_MODE,YML_LANG=>rex_i18n::getLocale(),YML_NAVI=>DEF_NAVI,YML_CONT=>DEF_CONT,YML_MDBE=>DEF_MDBE,YML_HEAD=>DEF_HEAD,YML_LEVL=>DEF_LEVL,YML_CHAP=>DEF_CHAP],
+    [YML_MODE=>DEF_MODE,YML_LANG=>substr(rex_i18n::getLocale(),0,2),YML_NAVI=>DEF_NAVI,YML_CONT=>DEF_CONT,YML_MDBE=>DEF_MDBE,YML_HEAD=>DEF_HEAD,YML_LEVL=>DEF_LEVL,YML_CHAP=>DEF_CHAP],
     (array)$this->getProperty( YML_SECTION, [] ),
     $pageDefaults[YML_SECTION]
 );
@@ -71,8 +73,29 @@ $defaults = array_merge (
 //----------
 // get language-sequence from current language and fallback-languages
 //
-$language = array_merge( [rex_i18n::getLocale(), $defaults[YML_LANG]], rex::getProperty('lang_fallback', []) );
-$language = array_values(array_unique( array_filter( $language, 'strlen' ) ));
+$languages =
+    array_values(
+        array_intersect(
+            array_unique(
+                array_map(
+                    function($l) { return substr($l,0,2); },
+                    array_filter(
+                        array_merge(
+                            [rex_i18n::getLocale(), $defaults[YML_LANG]],
+                            rex::getProperty('lang_fallback', [])
+                        ),
+                        'strlen'
+                    )
+                )
+            ),
+            array_map(
+                function($l) { return substr($l,0,2); },
+                rex_i18n::getLocales()
+            )
+        )
+    );
+
+$language = $languages;
 
 //----------
 // set pathNames
@@ -85,14 +108,12 @@ $docsRoot = $addonRoot . PATH_DOC;
 $image = rex_request( URL_IMAGE, 'string');
 
 //----------
-// docs-mode: reduce $language to existing directories with fallback to readme-mode
+// docs-mode or image: reduce $languages to existing directories with fallback to readme-mode
 if( $defaults[YML_MODE] == MODE_DOC || $image ) {
-	$dummy = array_map(function($v) use ($docsRoot) { return "$docsRoot$v/"; }, $language);
-	$dummy = array_filter( $dummy, function($v) { return is_dir($v); });
-	if( $dummy ) {
-		$first = array_shift( $dummy );
-		$dummy = array_merge( [$first,$docsRoot], $dummy );
-		$language = array_values( $dummy );
+	$languagePath = array_map(function($l) use ($docsRoot) { return "$docsRoot$l/"; }, $languages);
+	$languagePath = array_filter( $languagePath, function($l) { return is_dir($l); });
+	if( $languagePath ) {
+        array_splice( $languagePath, 1, 0, $docsRoot );
 	} else {
 		$defaults[YML_MODE] = MODE_README;
 	}
@@ -105,14 +126,14 @@ if( $defaults[YML_MODE] == MODE_DOC || $image ) {
 if ( $image )
 {
     rex_response::cleanOutputBuffers();
-    foreach( $language as $dir ) {
+    foreach( $languagePath as $dir ) {
         $imageFile = "$dir$image";
         if( is_file( $imageFile ) ) {
             rex_response::sendFile( $imageFile, mime_content_type( $imageFile ) );
             exit;
         }
     }
-    header( 'HTTP/1.1 Not Found' );
+    header( 'HTTP/1.1 404 Not Found' );
     exit;
 }
 
@@ -132,6 +153,8 @@ $files = [];
 $navigation = '';
 $content = '';
 $selected = '';
+$repoNavigation = '';
+$repoContent = '';
 
 //----------
 // complex multi-file manual
@@ -148,18 +171,24 @@ if( $defaults[YML_MODE] == MODE_DOC ) {
 	//----------
 	// read content-file and navigation file with language-fallback
 	//
-    foreach( $language as $dir ) {
-		if( $content = rex_file::get("$dir$contentFile",'') ) break;
+    foreach( $languagePath as $dir ) {
+		if( $content = rex_file::get("$dir$contentFile",'') ) {
+            $contentFile = substr("$dir$contentFile",strlen($addonRoot) );
+            break;
+        }
 	}
-	foreach( $language as $dir ) {
-		if( $navigation = rex_file::get("$dir$navigationFile",'') ) break;
+	foreach( $languagePath as $dir ) {
+		if( $navigation = rex_file::get("$dir$navigationFile",'') ) {
+            $navigationFile = substr("$dir$navigationFile",strlen($addonRoot) );
+            break;
+        }
 	}
 
 	//---------
 	// get files allowed for simplified internal reference
     //
     if( $content > '' || $navigation > '') {
-        foreach( array_reverse($language) as $lang ) {
+        foreach( array_reverse($languagePath) as $lang ) {
     		foreach( rex_finder::factory( $lang ) as $v ) $files[$v->getFilename()] = $v;
     	}
     }
@@ -171,6 +200,13 @@ if( $defaults[YML_MODE] == MODE_DOC ) {
         $content = $this->i18n('docs_not_found');
     }
 
+    //----------
+    // prepare Github-links
+    if( $defaults[YML_REPO] ) {
+        $repoNavigation = str_replace( '%%', $navigationFile, $defaults[YML_REPO] );
+        $repoContent = str_replace( '%%', $contentFile, $defaults[YML_REPO] );
+    }
+
 }
 
 //----------
@@ -180,25 +216,31 @@ else {
 
 	//----------
 	// initial values for readme-mode
-	$contentFile = "{$addonRoot}README.md";
-    $contentFile = 'README.md';
+	#$contentFile = "{$addonRoot}README.md";
+    #$contentFile = 'README.md';
+
+    //----------
+    // get the README by language and language-fallback
+    foreach( $languages as $lang ) {
+        $contentFile = "README.$lang.md";
+        $content = rex_file::get( "$addonRoot$contentFile" );
+        if( $content === null ) continue;
+    }
+    if( $content === null ) {
+        $contentFile = "README.md";
+        $content = rex_file::get( "$addonRoot$contentFile", '' );
+    }
+
 
 	//----------
-	// if docsRoot search for language-specific file (with fallback)
 	// and get list of (supporting) files from docsRoot (i.e. images)
 	if( is_dir($docsRoot) ) {
-		foreach( array_merge([$language],$fallback) as $lang ) {
-			if( !is_file( "{$docsRoot}README.$lang.md" ) ) continue;
-			$contentFile = PATH_DOC . "README.$lang.md";
-			break;
-		}
-
 		foreach( rex_finder::factory( $docsRoot ) as $v ) $files[$v->getFilename()] = $v;
 	}
 
 	//----------
 	// read content-file and normalize line-breaks for future use
-    $content = "\n" . str_replace(["\n\r","\r"],"\n",rex_file::get( "$addonRoot$contentFile", '' ));
+    $content = "\n" . str_replace(["\n\r","\r"],"\n",$content);
 
     //----------
     // Detect Menu-Level
@@ -338,6 +380,12 @@ else {
             $navigation .= PHP_EOL;
         }
 
+        //----------
+        // prepare Github-links
+        if( $defaults[YML_REPO] ) {
+            $repoContent = str_replace( '%%', $contentFile, $defaults[YML_REPO] );
+        }
+
     }
 }
 
@@ -359,7 +407,7 @@ $search = '/(!)?\[(.*?)\]\((.*?)\)/';
 $replace = function ($item) use ($files,$imgUrl,$docUrl) {
         if( !$item[3] ) return $item[0];
         $link = explode('#',$item[3]);
-		$url = (isset($files[$link[0]]) ? ($item[1]=='!'?$imgUrl:$docUrl) : '') . $item[3];
+        $url = (isset($files[$link[0]]) ? ($item[1]=='!'?$imgUrl:$docUrl) : '') . $item[3];
         $link = "{$item[1]}[{$item[2]}]($url)";
 		return $link;
 	};
@@ -374,7 +422,24 @@ $content = $parser->text($content);
 $navigation = $parser->text($navigation);
 unset( $parser );
 
-/----------
+
+//----------
+// format Github-links
+$button = ['label'=>' '.$this->i18n('docs_repository_button'),'icon'=>'editmode','attributes'=>['class'=>['btn-xs','btn-default','pull-right']]];
+if( $repoContent ) {
+    $button['url'] = $repoContent;
+    $fragment = new rex_fragment();
+    $fragment->setVar('buttons',[$button],false);
+    $repoContent = $fragment->parse('core/buttons/button.php');
+}
+if( $repoNavigation ) {
+    $button['url'] = $repoNavigation;
+    $fragment = new rex_fragment();
+    $fragment->setVar('buttons',[$button],false);
+    $repoNavigation = $fragment->parse('core/buttons/button.php');
+}
+
+//----------
 // generate output
 
 if( $defaults[YML_HEAD] ) {
@@ -382,39 +447,44 @@ if( $defaults[YML_HEAD] ) {
 }
 
 $fragment = new rex_fragment();
-$fragment->setVar('title', $this->i18n('docs_content'), false );
+$fragment->setVar('title', $this->i18n('docs_content').$repoContent, false );
 $fragment->setVar('body', $content, false);
 $content = $fragment->parse('core/page/section.php');
 
 if( $navigation ) {
 
 	$fragment = new rex_fragment();
-	$fragment->setVar('title', $this->i18n('docs_navigation'), false );
+	$fragment->setVar('title', $this->i18n('docs_navigation').$repoNavigation, false );
 	$fragment->setVar('body', $navigation, false);
 	$navigation = $fragment->parse('core/page/section.php');
 
 	$fragment = new rex_fragment();
 	$fragment->setVar('content', [$navigation,$content], false);
-	$fragment->setVar('classes', ['col-md-4 yform-docs-navi','col-md-8 yform-docs-content'], false);
+	$fragment->setVar('classes', ['col-md-4 rex-documentation-navi','col-md-8 rex-documentation-content'], false);
 	$content = $fragment->parse('core/page/grid.php');
 
 }
 
 $fragment = new rex_fragment();
 $fragment->setVar('content', $content, false);
-$fragment->setVar('class', ' rex-yform-docs', false);
+$fragment->setVar('class', ' rex-documentation', false);
 echo $fragment->parse('core/page/section.php');
-
-//echo '<link rel="stylesheet" type="text/css" media="all" href="../assets/addons/yform/plugins/docs/docs.css?buster=1530520815">';
-echo '<style> .rex-yform-docs img {max-width:100%;}</style>';
 ?>
 <style>
-.rex-yform-docs h1 {
+.rex-documentation img {max-width:100%;}
+.rex-documentation h1 {
     font-size: 22px;
-    margin-top: 5px;
+    margin-top: 25px;
     margin-bottom: 20px;
+    border-top: 1px solid gray;
+    padding-top: 5px;
 }
-.rex-yform-docs h2 {
+.rex-documentation h1:first-child {
+    margin-top: 5px;
+    border-top: 0;
+    padding-top: 0;
+}
+.rex-documentation h2 {
     font-size: 16px;
     margin-top: 40px;
     text-transform: uppercase;
@@ -424,68 +494,68 @@ echo '<style> .rex-yform-docs img {max-width:100%;}</style>';
     padding: 13px 15px 10px;
     background: #eee;
 }
-.rex-yform-docs h3 {
+.rex-documentation h3 {
     margin-top: 40px;
     margin-bottom: 5px;
 }
 
-.rex-yform-docs blockquote {
+.rex-documentation blockquote {
     margin: 20px 0;
     background: #f3f6fb;
 }
-.rex-yform-docs blockquote h2 {
+.rex-documentation blockquote h2 {
     margin: -10px -20px 20px;
     background: transparent;
 	border-top: 1px #ccc;
 }
 
-.rex-yform-docs ol {
+.rex-documentation ol {
     padding-left: 18px;
 }
 
-.rex-yform-docs ul {
+.rex-documentation ul {
     margin-bottom: 10px;
 	padding-bottom: 5px;;
     padding-left: 16px;
 }
-.rex-yform-docs ul li {
+.rex-documentation ul li {
     list-style-type: square;
     list-style-position: outside;
 }
-.rex-yform-docs ul ul {
+.rex-documentation ul ul {
     padding-top: 5px;
 }
-.rex-yform-docs ul ul li {
+.rex-documentation ul ul li {
     list-style-type: circle;
     list-style-position: outside;
     padding-bottom: 0;
 }
 
-.rex-yform-docs p,
-.rex-yform-docs li {
+.rex-documentation p,
+.rex-documentation li {
     font-size: 14px;
     line-height: 1.6;
 }
 
-.rex-yform-docs hr {
+.rex-documentation hr {
     margin-top: 40px;
     border-top: 1px solid #ddd;
 }
 
-.rex-yform-docs table {
+.rex-documentation table {
     width: 100%;
     max-width: 100%;
     border-top: 1px solid #ddd;
     border-bottom: 1px solid #ddd;
     margin: 20px 0 30px;
 }
-.rex-yform-docs th {
+.rex-documentation th {
     background: #f7f7f7;
     border-bottom: 2px solid #ddd;
     border-collapse: separate;
 }
-.rex-yform-docs th,
-.rex-yform-docs td {
+.rex-documentation th,
+.rex-documentation td {
     border-top: 1px solid #ddd;
     padding: 8px;
     line-height: 1.42857143;
@@ -494,33 +564,32 @@ echo '<style> .rex-yform-docs img {max-width:100%;}</style>';
 }
 
 
-.rex-yform-docs .yform-docs-navi ul {
+.rex-documentation .rex-documentation-navi ul {
     margin-bottom: 10px;
     padding-left: 0;
 }
-.rex-yform-docs .yform-docs-navi ul li {
+.rex-documentation .rex-documentation-navi ul li {
     list-style-type: none;
     background: #eee;
     padding: 0 15px;
     line-height: 40px;
 }
-.rex-yform-docs .yform-docs-navi ul {
+.rex-documentation .rex-documentation-navi ul {
     background: #fff;
     margin-left: -15px;
     margin-right: -15px;
 }
-.rex-yform-docs .yform-docs-navi ul li li {
+.rex-documentation .rex-documentation-navi ul li li {
     list-style-type: none;
     background: #fff;
     line-height: 30px;
 }
-.rex-yform-docs .yform-docs-navi ul li li:before {
+.rex-documentation .rex-documentation-navi ul li li:before {
 font-family: FontAwesome;
     content: '\f0a9';
     margin-right: 10px;
 }
-.rex-yform-docs .yform-docs-navi ul sup {
+.rex-documentation .rex-documentation-navi ul sup {
     display: none;
 }
 </style>
-<?php /**/
