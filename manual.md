@@ -34,7 +34,7 @@ Spalte angezeigt wird.
 - **Kapitel/Inhalt:** Ein Kapitel der README.md wird - gewissermaßen als virtuelle Datei -  in der breiteren rechten Spalte angezeigt.
 
 Die Datei README.md wird im Root eines Addons erwartet. Sofern es sprachspezifische Versionen gibt, müssen sie
-im Verzeichnis `/docs` stehen.
+im Namen eine entsprechende Kennung aufweisen.
 
     «addon»/
         REDAME.de.md
