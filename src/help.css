@@ -1,0 +1,34 @@
+/*
+    Erweitert prims.css (code-Blöcke in der Doku formatieren)
+    um einige weitere Einstellungen auf Basis der Redaxo-Styles
+
+    muss per  asset_packer bei der Installation mit prism gemischt werden.
+*/
+
+.help-documentation {
+    background-color: $panel-bg;
+    padding: $panel-body-padding;
+    margin-bottom: $line-height-computed ;
+}
+.panel-body > .help-documentation {
+    padding: 0;
+    margin-bottom:0;
+}
+
+.rex-docs {
+    &-sidebar {
+        flex-basis: 300px;
+    }
+    &-content {
+        max-width: 950px;
+
+        img {
+            box-shadow: 2px 2px 20px silver; border-radius: 5px;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+    }
+}
