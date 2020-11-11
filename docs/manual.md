@@ -93,7 +93,7 @@ Die Ersetzungsregel für Links ist:
 - Innerhalb von Codeblöcken (\`\`\` ... \`\`\` bzw. \`...\`) findet keine Ersetzung statt.
 
 Die Links im Quelldokument werden durch eine URL des REDAXO-Backends ersetzt. Konkret wird die URL
-der Hilfeseite um einen Parameter '&doc=link' ergänzt. Der Link ist immer relativ zum aktuellen
+der Hilfeseite um einen Parameter `&doc=link` ergänzt. Der Link ist immer relativ zum aktuellen
 Addon-Root.
 
 Z.B. wird beim Aufruf aus der Addon-Verwaltung aus der initialen Aufruf
@@ -220,8 +220,8 @@ _README.md_ angezeigt.
 ## Assets
 
 Neben Markdown-Dokumenten (.md) selbst können aus einem Dokument heraus auch andere Ressourcen, insbesondere
-Bilder eingebunden werden. Sie können im docs-Verzeichnis platziert werden. Der Übersichtlichkeit
-förderlich ist ein separates Unterverzeichnis, z.B. `docs/assets`.
+Bilder eingebunden werden. Sie müssen aus konform zu den [Absicherungsregeln](#d) im docs-Verzeichnis platziert werden.
+Der Übersichtlichkeit förderlich ist ein separates Unterverzeichnis, z.B. `docs/assets`.
 
 **HELP.PHP** schleust Dateien, die nicht vom Typ _Markdown_ sind, mit ihrem Mime-Type durch. Dateien,
 deren Suffix nicht auf der Liste der für den Medienpool zulässigen Dokumenttypen stehen, werden geblockt.
@@ -270,7 +270,7 @@ Gibt es die Datei (z.B. _docs/overview.de.md_) nicht, wird als Fallback die Basi
 (z.B. _docs/overview.md_). Eine alternativ vorhandene Sprache (im Beispiel `.en.`) wird nicht gesucht.
 
 Auf Github können sprachspezifische Dateien direkt untereinander verlinkt werden. Z.B wird aus
-_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen:
+_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen mit Fallback auf _docs/assets/input.en.jpg_:
 
 ```markdown
 ![Input-Form](assets/formular.en.jpg)
@@ -291,11 +291,11 @@ Sprache herangezogen. Am Beispiel der Backend-Sprache `de`:
 
 > Dieser Punkt hat nur Auswirkungen im READXO-Backend, nicht in der Github-Ansicht.
 
-Die Markdown-Dateien werden über Methode `rex_markdown::parseWithToc()` und das Fragment
+Die Markdown-Dateien werden über die Methode `rex_markdown::parseWithToc()` und das Fragment
 `core/page/docs.php` aufbereitet. Für die Anzeige wird das dafür in REDAXO vorgesehene CSS verwendet.
 
 Sofern eine darüber hinaus gehende Individualisierung gewünscht ist, z.B. für Syntax-Highlighting
-oder anderes Layout, können im Asset-Verzeichnis des Addons CSS- und JS-Dateien bereitgestellt werden.
+oder ein anderes Layout, können im Asset-Verzeichnis des Addons CSS- und JS-Dateien bereitgestellt werden.
 **HELP.PHP** versucht stets, diese Dateien (_help.min.css_ bzw. _help.min.js_) vor der Ausgabe einer
 Markdown-Datei zu laden.
 
@@ -334,13 +334,13 @@ Das Syntax-Highligthing unterstützt
 <a name="g1"></a>
 ### Integration
 
-Damit die EPs nicht bei jedem Seitenaufruf belegt werden, sollten sie nur dann belegt werden, wenn
+Damit die EPs nicht bei jedem Seitenaufruf aktiviert werden, sollten sie nur dann belegt werden, wenn
 tatsächlich eine Hilfe-Seite aufgerufen wird. Dazu bietet sich an
-- Aktivierung der EPs an den Anfang der help.php schreiben.
+- Aktivierung der EPs an den Anfang der _help.php_ schreiben statt in eine _boot.php_
   Dann muss bei evtl neuen Versionen von **HELP.PHP** daran gedacht werden, die Änderung zu Übernehmen.
 - Verwendung einer eigenen **help.php**, die die eigentliche **HELP.PHP** einbindet.
 
-Hier ein Beispiel:
+Hier ein Beispiel eine eigene _help.php_:
 ```php
 \rex_extension::register( 'HELP_NAVIGATION', function( \rex_extension_point $ep ){
     ...
@@ -348,7 +348,7 @@ Hier ein Beispiel:
 \rex_extension::register( 'HELP_HREF', function( \rex_extension_point $ep ){
     ...
 });
-include 'pfad_zur_/help.php';
+include 'pfad_zur_original_/help.php';
 
 ```
 
