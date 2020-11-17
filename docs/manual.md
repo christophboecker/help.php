@@ -76,12 +76,12 @@ Assets sollten immer relativ sein (readme.md: -> docs/xyz.md, docs/xyz.md: ->../
 **HELP.PHP** baut diese Links so um, dass sie durch eine geeignete Backend-URL ersetzt werden. Es werden
 nur Markdown-Links zu Dokumenten (`[label](link)`) bzw. Bildern (`![label](link)`) umgebaut,
 keine HTML-Tags (A, IMG). Daher sollten A- und IMG-Tags für relative Links innerhalb des Addons
-vermieden werden. Sie sind dennoch problemlos nutzbar, wenn eine absolute URL (`https://...`) benutzt wird.
+vermieden werden. Sie sind problemlos nutzbar, wenn eine absolute URL (`https://...`) angegeben wird.
 
-Links wie `?page=mediapool/media`, mit denen aus der Dokumentation direkt auf funktionale Seiten der
+Links wie `?page=mediapool/media`, mit denen aus der Dokumentation direkt auf Seiten innerhalb der
 REDAXO-Instanz verwiesen wird, funktionieren im REDAXO-Backend, aber nicht auf der Github-Seite.
 
-Links aus dem Addon heraus in andere Addons sind nicht zulässig, weil sie auf Github nicht i.d.R.
+Links aus dem Addon heraus in andere Addons sind nicht zulässig, weil sie auf Github i.d.R. nicht
 funktionieren und in REDAXO aus [Sicherheitsgründen](#d) geblockt sind.
 
 Die Ersetzungsregel für Links ist:
@@ -92,11 +92,7 @@ Die Ersetzungsregel für Links ist:
   `&doc=«link»` wird stets relativ zum Root-Verzeichnis des Addons angegeben.
 - Innerhalb von Codeblöcken (\`\`\` ... \`\`\` bzw. \`...\`) findet keine Ersetzung statt.
 
-Die Links im Quelldokument werden durch eine URL des REDAXO-Backends ersetzt. Konkret wird die URL
-der Hilfeseite um einen Parameter `&doc=link` ergänzt. Der Link ist immer relativ zum aktuellen
-Addon-Root.
-
-Z.B. wird beim Aufruf aus der Addon-Verwaltung aus der initialen Aufruf
+Z.B. wird beim Aufruf aus der Addon-Verwaltung aus dem initialen Aufruf
 ```html
 index.php?page=packages&subpage=help&package=addon_name
 ```
@@ -142,7 +138,7 @@ Aus der Github-Version
 ### Sektion "help:"
 
 In der _package.yml_ erfolgt die Konfiguration über eine eigene Sektion `help:`. Neben einer
-Default-Konfiguration können auch gezielt spezielle Layout für ausgewählte Backend-Seiten hinterlegt
+Default-Konfiguration können auch gezielt spezielle Layouts für ausgewählte Backend-Seiten hinterlegt
 werden. Dies ist die Grundstruktur:
 
 ```yaml
@@ -220,7 +216,7 @@ _README.md_ angezeigt.
 ## Assets
 
 Neben Markdown-Dokumenten (.md) selbst können aus einem Dokument heraus auch andere Ressourcen, insbesondere
-Bilder eingebunden werden. Sie müssen aus konform zu den [Absicherungsregeln](#d) im docs-Verzeichnis platziert werden.
+Bilder eingebunden werden. Sie müssen konform zu den [Absicherungsregeln](#d) im docs-Verzeichnis platziert werden.
 Der Übersichtlichkeit förderlich ist ein separates Unterverzeichnis, z.B. `docs/assets`.
 
 **HELP.PHP** schleust Dateien, die nicht vom Typ _Markdown_ sind, mit ihrem Mime-Type durch. Dateien,
@@ -270,7 +266,7 @@ Gibt es die Datei (z.B. _docs/overview.de.md_) nicht, wird als Fallback die Basi
 (z.B. _docs/overview.md_). Eine alternativ vorhandene Sprache (im Beispiel `.en.`) wird nicht gesucht.
 
 Auf Github können sprachspezifische Dateien direkt untereinander verlinkt werden. Z.B wird aus
-_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen mit Fallback auf _docs/assets/input.en.jpg_:
+_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen, allerdings gibt es hier kein Fallback. 
 
 ```markdown
 ![Input-Form](assets/formular.en.jpg)
@@ -336,12 +332,13 @@ Das Syntax-Highligthing unterstützt
 
 Damit die EPs nicht bei jedem Seitenaufruf aktiviert werden, sollten sie nur dann belegt werden, wenn
 tatsächlich eine Hilfe-Seite aufgerufen wird. Dazu bietet sich an
-- Aktivierung der EPs an den Anfang der _help.php_ schreiben statt in eine _boot.php_
+- Aktivierung der EPs an den Anfang der _help.php_ schreiben statt in eine _boot.php_.
   Dann muss bei evtl neuen Versionen von **HELP.PHP** daran gedacht werden, die Änderung zu Übernehmen.
 - Verwendung einer eigenen **help.php**, die die eigentliche **HELP.PHP** einbindet.
 
-Hier ein Beispiel eine eigene _help.php_:
+Hier ein Beispiel für eine eigene _help.php_:
 ```php
+<?php
 \rex_extension::register( 'HELP_NAVIGATION', function( \rex_extension_point $ep ){
     ...
 });
@@ -349,7 +346,6 @@ Hier ein Beispiel eine eigene _help.php_:
     ...
 });
 include 'pfad_zur_original_/help.php';
-
 ```
 
 <a name="g2"></a>
@@ -385,10 +381,10 @@ array:1 [▼
 
 Bevor die Navigation in HTML gegossen wird, kann das Navigationsmenü noch via Extension-Point
 bearbeitet werden. Das Menü selbst wird mit dem Fragment `core/navigations/content.php` erstellt.
-Das Array, dass die Konfigurationsinformationen je Menüpunkt enthält, wird im EP mit
-`$ep->getSubject()` bereitgestellt.
+Das Array, dass die Konfigurationsinformationen je Menüpunkt enthält, ist im EP mit
+`$ep->getSubject()` zugänglich.
 
-Das Originalprofil aus der package.yml des Addons wird in `$ep->getSubject()` übergeben.
+Das Originalprofil aus der package.yml des Addons wird in `$ep->getParams()` übergeben.
 
 Hier ein Beispiel:
 
