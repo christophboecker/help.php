@@ -1,4 +1,4 @@
-# **HELP.PHP** für REDAXO ab V5.7
+# **HELP.PHP** für REDAXO ab V5.10
 
 Mit **HELP.PHP** können komplexe Handbücher bzw. Online-Dokumentation für [REDAXO](https://redaxo.org/)-Addons
 bereitgestellt werden:
@@ -13,10 +13,11 @@ bereitgestellt werden:
 >   - [Github first](#a1)
 >   - [Links und Link-Transformation](a2)
 >   - [Hauptnavigation](#a3)
-> - [Konfiguration per 'package.yml'](#b)
+> - [Konfiguration per _package.yml_](#b)
 >   - [Sektion "help:"](#b1)
 >   - [Handbuch-Seiten (page=...)](#b2)
 >   - [Fallback](#b3)
+> - [Konfiguration per _help.yml_](#h)
 > - [Assets](#c)
 > - [Absicherung](#d)
 > - [Sprachunterstützung](#e)
@@ -181,13 +182,28 @@ Zulässige Schlüsselwörter für einen Eintrag in der Hauptnavigation sind:
 | href | path _oder_ href | Eine URL statt «path»; «path» hat Vorrang vor «href» | ?page=.... |
 | active | optional | Dieser Eintrag wird initial aktiviert | true |
 | icon | optional | Die CSS-Klassen für ein &lt;i&gt;-Tag-Icon analog zu page-Einträgen | fa fa-book
+| subnav | optional | Subnavigation, die im Prinzip gleich aufgebaut ist. Bitte nur eine Sub-Ebene! | 
 
 Falls das Menü nur einen Eintrag hat, wird es nicht angezeigt.
 
 <a name="2"></a>
 ### Handbuch-Seiten (page=...)
 
-Die **HELP.PHP** kann auch für Seiten genutzt werden, die per package.yml definiert werden.
+Die **HELP.PHP** kann auch für Seiten genutzt werden, die per _package.yml_ definiert werden.
+```yaml
+help:
+    default:
+        initial: docs/overview.md
+        0:
+            title: translate:focuspoint_docs_overview
+            icon: fa fa-book
+            path: docs/overview.md
+        1:
+            title: translate:focuspoint_docs_edit
+            icon: fa fa-book
+            path: docs/edit.md
+```
+
 
 **Beipiel: eine Handbuch-Seite im Addon**
 
@@ -212,6 +228,37 @@ Auf dieser Basis sucht **HELP.PHP** zunächst nach der Sektion `help:` und dort 
 Sofern **HELP.PHP** keine anderen Informationen aus der _package.yml_ vorliegen, wird immer die Datei
 _README.md_ angezeigt.
 
+<a name="h"></a>
+### Konfiguration per _help.yml_
+
+Statt einer eigenen Sektion `help:` in der _package.yml_ können die Inhalte in eine separate Datei
+_help.yml_ ausgelagert werden. Der Aufbau ist identisch, allerdings fällt das Sektionsname `help:`
+weg:
+
+```yml
+default:
+    initial: docs/overview.md
+    1:
+        title: translate:geolocation_manpage_install
+        icon: fa fa-book
+        path: docs/install.md
+    2:
+        title: translate:geolocation_manpage_admin
+        icon: fa fa-book
+        path: docs/admin.md
+    3:
+        title: translate:geolocation_manpage_developer
+        icon: fa fa-book
+        path: docs/devphp.md
+        subnav:
+            0:
+                title: 'PHP'
+                path: docs/devphp.md
+            1:
+                title: 'JS'
+                path: docs/devjs.md
+```
+ 
 <a name="c"></a>
 ## Assets
 
@@ -384,7 +431,7 @@ bearbeitet werden. Das Menü selbst wird mit dem Fragment `core/navigations/cont
 Das Array, dass die Konfigurationsinformationen je Menüpunkt enthält, ist im EP mit
 `$ep->getSubject()` zugänglich.
 
-Das Originalprofil aus der package.yml des Addons wird in `$ep->getParams()` übergeben.
+Das Originalprofil aus der _package.yml_ des Addons wird in `$ep->getParams()` übergeben.
 
 Hier ein Beispiel:
 
