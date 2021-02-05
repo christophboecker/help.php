@@ -1,4 +1,4 @@
-# **HELP.PHP** für REDAXO ab V5.7
+# **HELP.PHP** für REDAXO ab V5.10
 
 Mit **HELP.PHP** können komplexe Handbücher bzw. Online-Dokumentation für [REDAXO](https://redaxo.org/)-Addons
 bereitgestellt werden:
