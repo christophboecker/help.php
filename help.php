@@ -315,7 +315,6 @@ if( !class_exists('help_documentation') )
                     $active = $active || $tab['active'];
                 }
             }
-            dump( $tabs );
             return $active ? $tabs : [];
         }
 
