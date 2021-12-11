@@ -32,3 +32,22 @@
 
     }
 }
+
+/* Außerdem Einstellungen für den darkmode ab Redaxo 5.13 (@schuer) */
+
+body.rex-theme-dark .help-documentation {
+	background-color: transparent
+}
+
+body.rex-theme-dark .rex-docs-content img {
+	box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5)
+}
+
+@media(prefers-color-scheme:dark) {
+	body.rex-has-theme:not(.rex-theme-light) .help-documentation {
+		background-color: transparent
+	}
+	body.rex-has-theme:not(.rex-theme-light) .rex-docs-content img {
+		box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.5)
+	}
+}
