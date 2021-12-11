@@ -1,5 +1,12 @@
 # Changelog
 
+## **11.12.2021** Version 2.2.0
+
+- Support für den Darkmode (ab REDAXO 5.13 verfügbar) (Dank an @schuer)
+
+___
+
+
 ## **05.02.2021** Version 2.1.0
 
 - Konfiguration alternativ über _help.yml_ oder Sektion in _package.yml_
