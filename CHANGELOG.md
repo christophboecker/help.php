@@ -1,5 +1,12 @@
 # Changelog
 
+## **12.12.2021** Version 2.3.0
+
+- Unterstützt REDAXO-Benutzerberechtigungen
+
+___
+
+
 ## **11.12.2021** Version 2.2.0
 
 - Support für den Darkmode (ab REDAXO 5.13 verfügbar) (Dank an @schuer)
