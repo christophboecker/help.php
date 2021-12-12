@@ -1,4 +1,4 @@
-# **HELP.PHP** für REDAXO ab V5.10
+# **HELP.PHP** V2.3 für REDAXO ab V5.10
 
 Mit **HELP.PHP** können komplexe Handbücher bzw. Online-Dokumentation für [REDAXO](https://redaxo.org/)-Addons
 bereitgestellt werden:
@@ -7,6 +7,8 @@ bereitgestellt werden:
 - Ersatz für das Plugin "documentation" (aka "Doku-Plugin")
 - Aufruf aus der Addon-Verwaltung (Button "Hilfe") an Stelle der `README.md`
 - Als Seite im Addon konfigurierbar
+- Komplexe, mehrseite Online-Hilfen inkl. Subseiten
+- Ermöglicht Berechtigungskonzepte
 
 ![Bild](docs/readme.jpg)
 
