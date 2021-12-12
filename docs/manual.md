@@ -1,4 +1,4 @@
-# **HELP.PHP** für REDAXO ab V5.10
+# **HELP.PHP** 2.3 für REDAXO ab V5.10
 
 Mit **HELP.PHP** können komplexe Handbücher bzw. Online-Dokumentation für [REDAXO](https://redaxo.org/)-Addons
 bereitgestellt werden:
@@ -18,8 +18,10 @@ bereitgestellt werden:
 >   - [Handbuch-Seiten (page=...)](#b2)
 >   - [Fallback](#b3)
 > - [Konfiguration per _help.yml_](#h)
+> - [Zugriffseinschränkungen](#i)
 > - [Assets](#c)
 > - [Absicherung](#d)
+> - [Permissions]
 > - [Sprachunterstützung](#e)
 > - [Individualisierung (CSS, JS)](#f)
 > - [Extension-Points](#g)
@@ -159,6 +161,8 @@ Nummern bieten sich an:
 help:
     default:
         initial: docs/overview.md
+        permissions:
+            docs/assets/config.jpg: admin[]
         0:
             title: translate:focuspoint_docs_overview
             icon: fa fa-book
@@ -167,11 +171,19 @@ help:
             title: translate:focuspoint_docs_edit
             icon: fa fa-book
             path: docs/edit.md
+        2:
+            title: translate:focuspoint_docs_config
+            icon: fa fa-book
+            perm: admin[]
+            path: docs/config.md
 ```
 
 Die mit `initial: ...` angegebene Datei wird beim ersten Aufruf angezeigt. Falls der Eintrag
 `initial: ...`fehlt, wird der erste gefundene Eintrag mit `active: true` herangezogen bzw. der
 erste Eintrag der Navigation.
+
+In der optionalen Sektion `permissions: ...` können [Zugriffseinschränkungen](#i) für weitere Dateien
+vermerkt werden.
 
 Zulässige Schlüsselwörter für einen Eintrag in der Hauptnavigation sind:
 
@@ -182,7 +194,8 @@ Zulässige Schlüsselwörter für einen Eintrag in der Hauptnavigation sind:
 | href | path _oder_ href | Eine URL statt «path»; «path» hat Vorrang vor «href» | ?page=.... |
 | active | optional | Dieser Eintrag wird initial aktiviert | true |
 | icon | optional | Die CSS-Klassen für ein &lt;i&gt;-Tag-Icon analog zu page-Einträgen | fa fa-book
-| subnav | optional | Subnavigation, die im Prinzip gleich aufgebaut ist. Bitte nur eine Sub-Ebene! | 
+| subnav | optional | Subnavigation, die im Prinzip gleich aufgebaut ist. Bitte nur eine Sub-Ebene! |
+| perm | optional | Schränkt den Zugriff auf die angegebene [Berechtigung](#i) ein. |
 
 Falls das Menü nur einen Eintrag hat, wird es nicht angezeigt.
 
@@ -194,6 +207,9 @@ Die **HELP.PHP** kann auch für Seiten genutzt werden, die per _package.yml_ def
 help:
     default:
         initial: docs/overview.md
+        permissions:
+            docs/assets/config.jpg: admin[]
+
         0:
             title: translate:focuspoint_docs_overview
             icon: fa fa-book
@@ -202,6 +218,11 @@ help:
             title: translate:focuspoint_docs_edit
             icon: fa fa-book
             path: docs/edit.md
+        2:
+            title: translate:focuspoint_docs_config
+            icon: fa fa-book
+            perm: admin[]
+            path: docs/config.md
 ```
 
 
@@ -250,6 +271,8 @@ default:
         title: translate:geolocation_manpage_developer
         icon: fa fa-book
         path: docs/devphp.md
+        perm:
+            1: admin[]
         subnav:
             0:
                 title: 'PHP'
@@ -258,7 +281,7 @@ default:
                 title: 'JS'
                 path: docs/devjs.md
 ```
- 
+
 <a name="c"></a>
 ## Assets
 
@@ -293,6 +316,47 @@ Auch innerhalb des Addons sind nur folgende Dateien zulässig:
 - «addon_root»/CREDITS.md
 - «addon_root»/docs/*
 
+<a name="i"></a>
+## Permissions
+
+Die Hilfetexte sind für alle auf das Addon berechtigten User zugänglich, außer der Zugriff wird
+über User-Rollen eingeschränkt. Das entspricht der üblichen Berechtigungseinschränkung für Seiten
+in Redaxo. Die Berechtigung wird bei der jeweiligen Seite erteilt (z.B. `perm: admin[]`).
+
+> Die Texte eines auf GitHUB o.ä. öffentlichen Repositories zugänglichen Addons sind dem Kundigen
+> immer zugänglich. Permissions sind eher eine Methode der rollenbezogenen Focusierung.
+
+```yaml
+help:
+    default:
+        initial: docs/overview.md
+        permissions:
+            docs/assets/config.jpg: admin[]
+            docs/sub1.md:
+                1: focuspoint[redakteur]
+                2: focuspoint[lektor]
+
+        0:
+            title: translate:focuspoint_docs_overview
+            icon: fa fa-book
+            path: docs/overview.md
+        1:
+            title: translate:focuspoint_docs_edit
+            icon: fa fa-book
+            path: docs/edit.md
+        2:
+            title: translate:focuspoint_docs_config
+            icon: fa fa-book
+            perm: admin[]
+            path: docs/config.md
+```
+
+Zusätzlich zu den im Menü enthaltenen Seiten können Seiten ohne Menüeintrag (Subseiten) und Assets
+Zugriffsbeschränkungen über eine zusätzliche optionale Sektion `permissions:` erhalten.
+werden in einer separaten Sektion
+
+Alle nicht durch Permissions beschränkte Seiten sind zugänglich.
+
 <a name="e"></a>
 ## Sprachunterstützung
 
@@ -313,7 +377,7 @@ Gibt es die Datei (z.B. _docs/overview.de.md_) nicht, wird als Fallback die Basi
 (z.B. _docs/overview.md_). Eine alternativ vorhandene Sprache (im Beispiel `.en.`) wird nicht gesucht.
 
 Auf Github können sprachspezifische Dateien direkt untereinander verlinkt werden. Z.B wird aus
-_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen, allerdings gibt es hier kein Fallback. 
+_docs/overview.en.md_ das Bild _docs/assets/input.en.jpg_ aufgerufen, allerdings gibt es hier kein Fallback.
 
 ```markdown
 ![Input-Form](assets/formular.en.jpg)
